@@ -1,0 +1,21 @@
+{
+  "name": "new_places",
+  "version": "1.0.0",
+  "description": "Creates and saves a collection of 'places' (cards with names and pictures)",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon index.js",
+    "dev": "nodemon index.js --open --watch"
+  },
+  "author": "Elena Silina",
+  "license": "ISC",
+  "devDependencies": {
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-plugin-import": "^2.20.1",
+    "nodemon": "^2.0.2"
+  },
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
