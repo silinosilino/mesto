@@ -1,5 +1,5 @@
 {
-  "name": "new_places",
+  "name": "mesto",
   "version": "1.0.0",
   "description": "Creates and saves a collection of 'places' (cards with names and pictures)",
   "main": "app.js",
