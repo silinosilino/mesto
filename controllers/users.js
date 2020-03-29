@@ -1,9 +1,5 @@
 const User = require('../models/user');
 
-
-// const users = require('../data/users.json');
-
-
 module.exports.getUsers = (req, res) => {
   User.find({})
     .then(users => res.send({ data: users }))
@@ -29,29 +25,17 @@ module.exports.createUser = (req, res) => {
 module.exports.updateProfile = (req, res) => {
   const { name, about } = req.body;
   console.log(name, about);
-  User.findByIdAndUpdate(req.user._id, { name: name, about: about }, {
-    new: true,
-    runValidators: true,
-    upsert: true
-})
+  User.findByIdAndUpdate(req.user._id, { name: name, about: about },
+    { new: true })
         .then(user => res.send({ data: user }))
         .catch(err => res.status(500).send({ message: 'Произошла ошибка' }));
 };
 
 module.exports.updateAvatar = (req, res) => {
   const { avatar } = req.body;
-  User.findByIdAndUpdate(req.user._id, { avatar: avatar }, {
-    new: true,
-    runValidators: true,
-    upsert: true
-})
+  User.findByIdAndUpdate(req.user._id, { avatar: avatar },
+    { new: true,
+    runValidators: true })
       .then(user => res.send({ data: user }))
       .catch(err => res.status(500).send({ message: 'Произошла ошибка' }));
 };
-//   const user = users.find((elem) => elem._id === req.params.id);
-//   if (!user) {
-//     res.status(404).send({ message: 'Нет пользователя с таким id' });
-//     return;
-//   }
-//   res.send(user);
-// };
