@@ -15,6 +15,7 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
 const { PORT = 3000 } = process.env;
 
 const app = express();
+
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
@@ -25,7 +26,6 @@ app.use((req, res, next) => {
   req.user = {
       _id: '5e7fecca355802ad347f98e3'
   };
-
   next();
 });
 
