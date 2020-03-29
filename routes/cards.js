@@ -7,3 +7,9 @@ cardsRouter.get('/', (req, res) => {
 });
 
 module.exports = cardsRouter;
+
+
+
+// GET /cards — возвращает все карточки
+// POST /cards — создаёт карточку
+// DELETE /cards/:cardId — удаляет карточку по идентификатору

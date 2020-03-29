@@ -10,7 +10,10 @@ module.exports.doesUserExist = (req, res) => {
 
 
 module.exports.createUser = (req, res) => {
+  console.log("hello");
+  console.log(req.body);
   const { name, about, avatar } = req.body;
+  console.log(name, about, avatar);
 
   User.create({ name, about, avatar })
       .then(user => res.send({ data: user }))

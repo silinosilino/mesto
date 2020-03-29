@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
+const bodyParser = require('body-parser');
 
 const usersRouter = require('./routes/users.js');
 const cardsRouter = require('./routes/cards.js');
@@ -15,11 +16,23 @@ const { PORT = 3000 } = process.env;
 
 const app = express();
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
+
 app.use('/', usersRouter);
 app.use('/cards', cardsRouter);
+app.use((req, res, next) => {
+  req.user = {
+      _id: '5d8b85e7fecca355802ad347f98e3'
+  };
 
-app.use((req, res) => {
-  res.status(404).send({ message: 'Запрашиваемый ресурс не найден' });
+  next();
 });
+
+// app.use((req, res) => {
+//   res.status(404).send({ message: 'Запрашиваемый ресурс не найден' });
+// });
 
 app.listen(PORT);
