@@ -11,8 +11,9 @@ module.exports.doesUserExist = (req, res) => {
     .then((user) => {
       if (!user) {
         res.status(404).send({ message: 'User not found' });
+      } else {
+        res.status(200).send({ data: user });
       }
-      res.send({ data: user });
     })
     .catch((err) => res.status(500).send({ message: err.message }));
 };
