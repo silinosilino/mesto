@@ -17,8 +17,16 @@ module.exports.createCard = (req, res) => {
 };
 
 module.exports.deleteCard = (req, res) => {
-  Card.findByIdAndRemove(req.params.cardId)
-    .then((card) => res.send({ data: card }))
+  Card.findById(req.params.cardId)
+    .then((card) => {
+      if (card.owner.toString() === req.user._id) {
+        Card.findByIdAndRemove(req.params.cardId)
+          .then((item) => res.send({ data: item }))
+          .catch((err) => res.status(500).send({ message: err.message }));
+      } else {
+        res.status(404).send({ message: 'This card belongs to another user' });
+      }
+    })
     .catch((err) => res.status(500).send({ message: err.message }));
 };
 
