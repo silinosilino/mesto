@@ -3,7 +3,7 @@ const Card = require('../models/card');
 module.exports.getCards = (req, res) => {
   Card.find({})
     .populate(['owner', 'likes'])
-    .then((card) => res.send({ data: card }))
+    .then((card) => res.status(200).send({ data: card }))
     .catch((err) => res.status(500).send({ message: err.message }));
 };
 
@@ -12,8 +12,14 @@ module.exports.createCard = (req, res) => {
   Card.create({
     name, link, owner: req.user._id, likes: [],
   })
-    .then((card) => res.send({ data: card }))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .then((card) => res.status(200).send({ data: card }))
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(400).send({ message: err.message });
+      } else {
+        res.status(500).send({ message: err.message });
+      }
+    });
 };
 
 module.exports.deleteCard = (req, res) => {
@@ -21,7 +27,7 @@ module.exports.deleteCard = (req, res) => {
     .then((card) => {
       if (card.owner.toString() === req.user._id) {
         Card.findByIdAndRemove(req.params.cardId)
-          .then((item) => res.send({ data: item }))
+          .then((item) => res.status(202).send({ data: item }))
           .catch((err) => res.status(500).send({ message: err.message }));
       } else {
         res.status(404).send({ message: 'This card belongs to another user' });
@@ -36,7 +42,7 @@ module.exports.likeCard = (req, res) => Card.findByIdAndUpdate(
   { new: true },
 )
   .populate(['owner', 'likes'])
-  .then((card) => res.send({ data: card }))
+  .then((card) => res.status(200).send({ data: card }))
   .catch((err) => res.status(500).send({ message: err.message }));
 
 module.exports.dislikeCard = (req, res) => Card.findByIdAndUpdate(
@@ -44,5 +50,5 @@ module.exports.dislikeCard = (req, res) => Card.findByIdAndUpdate(
   { $pull: { likes: req.user._id } },
   { new: true },
 )
-  .then((card) => res.send({ data: card }))
+  .then((card) => res.status(200).send({ data: card }))
   .catch((err) => res.status(500).send({ message: err.message }));
