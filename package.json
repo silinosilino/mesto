@@ -4,8 +4,8 @@
   "description": "Creates and saves a collection of 'places' (cards with names and pictures)",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon index.js",
-    "dev": "nodemon index.js --open --watch",
+    "start": "node app.js",
+    "dev": "nodemon app.js --open --watch",
     "eslint": "eslint . --ext .js",
     "eslintFix": "eslint . --ext .js --fix"
   },
