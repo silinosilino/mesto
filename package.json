@@ -1,11 +1,13 @@
 {
-  "name": "new_places",
+  "name": "mesto",
   "version": "1.0.0",
   "description": "Creates and saves a collection of 'places' (cards with names and pictures)",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon index.js",
-    "dev": "nodemon index.js --open --watch"
+    "start": "node app.js",
+    "dev": "nodemon app.js --open --watch",
+    "eslint": "eslint . --ext .js",
+    "eslintFix": "eslint . --ext .js --fix"
   },
   "author": "Elena Silina",
   "license": "ISC",
@@ -16,6 +18,8 @@
     "nodemon": "^2.0.2"
   },
   "dependencies": {
-    "express": "^4.17.1"
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "mongoose": "^5.9.6"
   }
 }
