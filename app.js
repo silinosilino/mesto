@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 
 const usersRouter = require('./routes/users.js');
 const cardsRouter = require('./routes/cards.js');
+const { createUser, login } = require('./controllers/users');
 
 mongoose.connect('mongodb://localhost:27017/mestodb', {
   useNewUrlParser: true,
@@ -30,6 +31,8 @@ app.use((req, res, next) => {
   next();
 });
 
+app.post('/signin', login);
+app.post('/signup', createUser);
 app.use('/', usersRouter);
 app.use('/', cardsRouter);
 
