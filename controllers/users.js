@@ -38,7 +38,19 @@ module.exports.createUser = (req, res) => {
 };
 
 module.exports.login = (req, res) => {
+  const { email, password } = req.body;
 
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      res
+        .status(200)
+        .send({ user, message: 'Авторизация прошла успешно' });
+    })
+    .catch((err) => {
+      res
+        .status(401)
+        .send({ message: err.message });
+    });
 };
 
 module.exports.updateProfile = (req, res) => {
