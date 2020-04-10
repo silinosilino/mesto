@@ -27,13 +27,6 @@ app.use(bodyParser.urlencoded({
   extended: true,
 }));
 
-// app.use((req, res, next) => {
-//   req.user = {
-//     _id: '5e855f164d2ca7c82a4ad723',
-//   };
-//   next();
-// });
-
 app.post('/signin', login);
 app.post('/signup', createUser);
 app.use(auth);
