@@ -4,8 +4,6 @@ const { NODE_ENV, JWT_SECRET } = process.env;
 
 module.exports = (req, res, next) => {
   const { authorization } = req.headers;
-  console.log(authorization);
-  // console.log(req);
 
   if (!authorization || !authorization.startsWith('Bearer ')) {
     return res
@@ -26,5 +24,5 @@ module.exports = (req, res, next) => {
 
   req.user = payload;
 
-  next();
+  return next();
 };
