@@ -6,6 +6,8 @@ const bodyParser = require('body-parser');
 const usersRouter = require('./routes/users.js');
 const cardsRouter = require('./routes/cards.js');
 const { createUser, login } = require('./controllers/users');
+const auth = require('./middlewares/auth');
+
 
 mongoose.connect('mongodb://localhost:27017/mestodb', {
   useNewUrlParser: true,
@@ -24,15 +26,16 @@ app.use(bodyParser.urlencoded({
   extended: true,
 }));
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: '5e855f164d2ca7c82a4ad723',
-  };
-  next();
-});
+// app.use((req, res, next) => {
+//   req.user = {
+//     _id: '5e855f164d2ca7c82a4ad723',
+//   };
+//   next();
+// });
 
 app.post('/signin', login);
 app.post('/signup', createUser);
+app.use(auth);
 app.use('/', usersRouter);
 app.use('/', cardsRouter);
 
