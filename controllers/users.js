@@ -63,7 +63,10 @@ module.exports.login = (req, res) => {
 module.exports.updateProfile = (req, res) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, about },
-    { new: true })
+    {
+      new: true,
+      runValidators: true,
+    })
     .then((user) => res.status(200).send({ data: user }))
     .catch((err) => res.status(500).send({ message: err.message }));
 };
