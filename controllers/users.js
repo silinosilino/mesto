@@ -11,14 +11,8 @@ module.exports.getUsers = (req, res) => {
 };
 
 module.exports.doesUserExist = (req, res) => {
-  User.findById(req.params.id)
-    .then((user) => {
-      if (!user) {
-        res.status(404).send({ message: 'User not found' });
-      } else {
-        res.status(200).send({ data: user });
-      }
-    })
+  User.findById(req.params.id).orFail(() => res.status(404).send({ message: 'User not found' }))
+    .then((user) => res.status(200).send({ data: user }))
     .catch((err) => res.status(500).send({ message: err.message }));
 };
 
