@@ -28,6 +28,9 @@ module.exports.createUser = (req, res) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(400).send({ message: err.message });
+      }
+      if (err.message.includes('duplicate key')) {
+        res.status(409).send({ message: err.message });
       } else {
         res.status(500).send({ message: err.message });
       }
@@ -44,6 +47,7 @@ module.exports.login = (req, res) => {
         .cookie('jwt', token, {
           maxAge: 3600000 * 24 * 7,
           httpOnly: true,
+          sameSite: true,
         })
         .send({ token });
     })
