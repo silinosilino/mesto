@@ -4,12 +4,11 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 
-const { DATABASE_URL } = require('./config.js');
+const { DATABASE_URL, PORT } = require('./config.js');
 const usersRouter = require('./routes/users.js');
 const cardsRouter = require('./routes/cards.js');
 const { createUser, login } = require('./controllers/users');
 const auth = require('./middlewares/auth');
-
 
 mongoose.connect(DATABASE_URL, {
   useNewUrlParser: true,
@@ -17,8 +16,6 @@ mongoose.connect(DATABASE_URL, {
   useFindAndModify: false,
   useUnifiedTopology: true,
 });
-
-const { PORT = 3000 } = process.env;
 
 const app = express();
 
