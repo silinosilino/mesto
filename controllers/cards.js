@@ -1,18 +1,5 @@
 const Card = require('../models/card');
-
-class CardNotFoundError extends Error {
-  constructor() {
-    super('Card not found');
-  }
-}
-
-function handleCardNotFound(err, res) {
-  let status = 500;
-  if (err instanceof CardNotFoundError) {
-    status = 404;
-  }
-  res.status(status).send({ message: err.message });
-}
+const { NotFoundError, notFoundHandler } = require('../errors/not-found-error');
 
 module.exports.getCards = (req, res) => {
   Card.find({})
@@ -37,7 +24,7 @@ module.exports.createCard = (req, res) => {
 };
 
 module.exports.deleteCard = (req, res) => {
-  Card.findById(req.params.cardId).orFail(() => new CardNotFoundError())
+  Card.findById(req.params.cardId).orFail(() => new NotFoundError())
     .then((card) => {
       if (card.owner.equals(req.user._id)) {
         Card.findByIdAndRemove(req.params.cardId)
@@ -47,22 +34,22 @@ module.exports.deleteCard = (req, res) => {
         res.status(403).send({ message: 'This card belongs to another user' });
       }
     })
-    .catch((err) => handleCardNotFound(err, res));
+    .catch((err) => notFoundHandler(err, res));
 };
 
 module.exports.likeCard = (req, res) => Card.findByIdAndUpdate(
   req.params.cardId,
   { $addToSet: { likes: req.user._id } },
   { new: true },
-).orFail(() => new CardNotFoundError())
+).orFail(() => new NotFoundError())
   .populate(['owner', 'likes'])
   .then((card) => res.status(200).send({ data: card }))
-  .catch((err) => handleCardNotFound(err, res));
+  .catch((err) => notFoundHandler(err, res));
 
 module.exports.dislikeCard = (req, res) => Card.findByIdAndUpdate(
   req.params.cardId,
   { $pull: { likes: req.user._id } },
   { new: true },
-).orFail(() => new CardNotFoundError())
+).orFail(() => new NotFoundError())
   .then((card) => res.status(200).send({ data: card }))
-  .catch((err) => handleCardNotFound(err, res));
+  .catch((err) => notFoundHandler(err, res));

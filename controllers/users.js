@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+const { NotFoundError, notFoundHandler } = require('../errors/not-found-error');
 
 const { JWT_SECRET } = require('../config.js');
 
@@ -11,9 +12,9 @@ module.exports.getUsers = (req, res) => {
 };
 
 module.exports.doesUserExist = (req, res) => {
-  User.findById(req.params.id).orFail(() => res.status(404).send({ message: 'User not found' }))
+  User.findById(req.params.id).orFail(() => new NotFoundError())
     .then((user) => res.status(200).send({ data: user }))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch((err) => notFoundHandler(err, res));
 };
 
 module.exports.createUser = (req, res) => {
