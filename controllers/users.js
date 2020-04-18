@@ -1,4 +1,9 @@
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+const { NotFoundError, notFoundHandler } = require('../errors/not-found-error');
+
+const { JWT_SECRET } = require('../config.js');
 
 module.exports.getUsers = (req, res) => {
   User.find({})
@@ -7,34 +12,60 @@ module.exports.getUsers = (req, res) => {
 };
 
 module.exports.doesUserExist = (req, res) => {
-  User.findById(req.params.id)
-    .then((user) => {
-      if (!user) {
-        res.status(404).send({ message: 'User not found' });
-      } else {
-        res.status(200).send({ data: user });
-      }
-    })
-    .catch((err) => res.status(500).send({ message: err.message }));
+  User.findById(req.params.id).orFail(() => new NotFoundError())
+    .then((user) => res.status(200).send({ data: user }))
+    .catch((err) => notFoundHandler(err, res));
 };
 
 module.exports.createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
-  User.create({ name, about, avatar })
-    .then((user) => res.status(200).send({ data: user }))
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
+  bcrypt.hash(password, 10)
+    .then((hash) => User.create({
+      name, about, avatar, email, password: hash,
+    }))
+    .then((user) => res.status(200).send({ data: user.omitPrivate() }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(400).send({ message: err.message });
+      }
+      if (err.message.includes('duplicate key')) {
+        res.status(409).send({ message: 'User with this email already exists' });
       } else {
         res.status(500).send({ message: err.message });
       }
     });
 };
 
+module.exports.login = (req, res) => {
+  const { email, password } = req.body;
+
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' });
+      res
+        .cookie('jwt', token, {
+          maxAge: 3600000 * 24 * 7,
+          httpOnly: true,
+          sameSite: true,
+        })
+        .send({ token });
+    })
+    .catch((err) => {
+      res
+        .status(401)
+        .send({ message: err.message });
+    });
+};
+
 module.exports.updateProfile = (req, res) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, about },
-    { new: true })
+    {
+      new: true,
+      runValidators: true,
+    })
     .then((user) => res.status(200).send({ data: user }))
     .catch((err) => res.status(500).send({ message: err.message }));
 };
