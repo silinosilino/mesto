@@ -9,6 +9,7 @@ const usersRouter = require('./routes/users.js');
 const cardsRouter = require('./routes/cards.js');
 const { createUser, login } = require('./controllers/users');
 const auth = require('./middlewares/auth');
+const { NotFoundError } = require('./errors/not-found-error');
 
 mongoose.connect(DATABASE_URL, {
   useNewUrlParser: true,
@@ -33,8 +34,22 @@ app.use(auth);
 app.use('/', usersRouter);
 app.use('/', cardsRouter);
 
-app.use((req, res) => {
-  res.status(404).send({ message: 'Page not found' });
+app.use(() => {
+  throw new NotFoundError('Page not found');
+  // res.status(404).send({ message: 'Page not found' });
+});
+
+app.use((err, req, res, next) => {
+  const { statusCode = 500, message } = err;
+
+  res
+    .status(statusCode)
+    .send({
+      message: statusCode === 500
+        ? 'Server error'
+        : message,
+    });
+  next();
 });
 
 app.listen(PORT);
