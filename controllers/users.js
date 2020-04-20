@@ -28,6 +28,7 @@ module.exports.createUser = (req, res) => {
     }))
     .then((user) => res.status(200).send({ data: user.omitPrivate() }))
     .catch((err) => {
+      console.log(err);
       if (err.name === 'ValidationError') {
         res.status(400).send({ message: err.message });
       }
@@ -35,6 +36,7 @@ module.exports.createUser = (req, res) => {
         res.status(409).send({ message: 'User with this email already exists' });
       } else {
         res.status(500).send({ message: err.message });
+        // res.status(500).send({ message: 'Here you go!' });
       }
     });
 };
