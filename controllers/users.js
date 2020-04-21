@@ -28,7 +28,6 @@ module.exports.createUser = (req, res) => {
     }))
     .then((user) => res.status(200).send({ data: user.omitPrivate() }))
     .catch((err) => {
-      console.log(err);
       if (err.name === 'ValidationError') {
         res.status(400).send({ message: err.message });
       }
