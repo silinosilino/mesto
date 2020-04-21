@@ -12,6 +12,7 @@ const cardsRouter = require('./routes/cards.js');
 const { createUser, login } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const { NotFoundError } = require('./errors/not-found-error');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 mongoose.connect(DATABASE_URL, {
   useNewUrlParser: true,
@@ -29,6 +30,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
   extended: true,
 }));
+
+app.use(requestLogger);
 
 app.post('/signin', login);
 app.post('/signup', celebrate({
@@ -49,6 +52,8 @@ app.use(() => {
   throw new NotFoundError('Page not found');
   // res.status(404).send({ message: 'Page not found' });
 });
+
+app.use(errorLogger);
 
 app.use(errors());
 
