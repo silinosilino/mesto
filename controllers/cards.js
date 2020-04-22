@@ -1,13 +1,12 @@
 const Card = require('../models/card');
 const { NotFoundError } = require('../errors/not-found-error');
-// const { NotFoundError } = require('../errors/not-found-error');
-// const { ValidationError } = require('../errors/validationError');
+const { ForbiddenError } = require('../errors/forbiddenError');
+const { ValidationError } = require('../errors/validationError');
 
 module.exports.getCards = (req, res, next) => {
   Card.find({})
     .populate(['owner', 'likes'])
     .then((card) => res.status(200).send({ data: card }))
-    // .catch((err) => res.status(500).send({ message: err.message }));
     .catch(next);
 };
 
@@ -19,13 +18,10 @@ module.exports.createCard = (req, res, next) => {
     .then((card) => res.status(200).send({ data: card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({ message: err.message });
-      } else {
-        // res.status(500).send({ message: err.message });
-        next();
+        return next(new ValidationError('Incorrect input'));
       }
+      return next();
     });
-  // .catch(next);
 };
 
 module.exports.deleteCard = (req, res, next) => {
@@ -36,7 +32,7 @@ module.exports.deleteCard = (req, res, next) => {
           .then((item) => res.status(200).send({ data: item }))
           .catch(next);
       } else {
-        res.status(403).send({ message: 'This card belongs to another user' });
+        throw new ForbiddenError('This card belongs to another user');
       }
     })
     .catch(next);
