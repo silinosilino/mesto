@@ -7,16 +7,15 @@ const { ValidationError } = require('../errors/validationError');
 
 const { JWT_SECRET } = require('../config.js');
 
-module.exports.getUsers = (req, res) => {
+module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.status(200).send({ data: users }))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch(next);
 };
 
 module.exports.doesUserExist = (req, res, next) => {
-  User.findById(req.params.id).orFail(() => new NotFoundError('Пользователь не найден'))
+  User.findById(req.params.id).orFail(() => new NotFoundError('User not found'))
     .then((user) => res.status(200).send({ data: user }))
-    // .catch((err) => notFoundHandler(err, res));
     .catch(next);
 };
 
@@ -55,14 +54,9 @@ module.exports.login = (req, res, next) => {
         .send({ token });
     })
     .catch(next);
-  // .catch((err) => {
-  //   res
-  //     .status(401)
-  //     .send({ message: err.message });
-  // });
 };
 
-module.exports.updateProfile = (req, res) => {
+module.exports.updateProfile = (req, res, next) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, about },
     {
@@ -70,10 +64,10 @@ module.exports.updateProfile = (req, res) => {
       runValidators: true,
     })
     .then((user) => res.status(200).send({ data: user }))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch(next);
 };
 
-module.exports.updateAvatar = (req, res) => {
+module.exports.updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(req.user._id, { avatar },
     {
@@ -81,5 +75,5 @@ module.exports.updateAvatar = (req, res) => {
       runValidators: true,
     })
     .then((user) => res.status(200).send({ data: user }))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch(next);
 };
