@@ -56,7 +56,6 @@ app.use('/', cardsRouter);
 
 app.use(() => {
   throw new NotFoundError('Page not found');
-  // res.status(404).send({ message: 'Page not found' });
 });
 
 app.use(errorLogger);
