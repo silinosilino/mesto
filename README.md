@@ -5,6 +5,9 @@ This project uses JS, GIT, Express, Mongoose.
 
 Project is located at https://github.com/silinosilino/mesto
 
+Public IP 130.193.37.19
+Available at www.places.tk
+
 ## Getting started 
 Clone this repository.
 
