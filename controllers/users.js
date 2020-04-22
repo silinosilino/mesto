@@ -2,6 +2,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const { NotFoundError } = require('../errors/not-found-error');
+const { ConflictError } = require('../errors/conflictError');
+const { ValidationError } = require('../errors/validationError');
 
 const { JWT_SECRET } = require('../config.js');
 
@@ -18,7 +20,7 @@ module.exports.doesUserExist = (req, res, next) => {
     .catch(next);
 };
 
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
@@ -29,14 +31,12 @@ module.exports.createUser = (req, res) => {
     .then((user) => res.status(200).send({ data: user.omitPrivate() }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({ message: err.message });
+        return next(new ValidationError('Incorrect input'));
       }
       if (err.message.includes('duplicate key')) {
-        res.status(409).send({ message: 'User with this email already exists' });
-      } else {
-        res.status(500).send({ message: err.message });
-        // res.status(500).send({ message: 'Here you go!' });
+        return next(new ConflictError('User with this email already exists'));
       }
+      return next();
     });
 };
 
