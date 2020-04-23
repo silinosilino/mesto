@@ -1,14 +1,16 @@
 const Card = require('../models/card');
-const { NotFoundError, notFoundHandler } = require('../errors/not-found-error');
+const { NotFoundError } = require('../errors/not-found-error');
+const { ForbiddenError } = require('../errors/forbiddenError');
+const { ValidationError } = require('../errors/validationError');
 
-module.exports.getCards = (req, res) => {
+module.exports.getCards = (req, res, next) => {
   Card.find({})
     .populate(['owner', 'likes'])
     .then((card) => res.status(200).send({ data: card }))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch(next);
 };
 
-module.exports.createCard = (req, res) => {
+module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
   Card.create({
     name, link, owner: req.user._id, likes: [],
@@ -16,40 +18,39 @@ module.exports.createCard = (req, res) => {
     .then((card) => res.status(200).send({ data: card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({ message: err.message });
-      } else {
-        res.status(500).send({ message: err.message });
+        return next(new ValidationError('Incorrect input'));
       }
+      return next();
     });
 };
 
-module.exports.deleteCard = (req, res) => {
-  Card.findById(req.params.cardId).orFail(() => new NotFoundError())
+module.exports.deleteCard = (req, res, next) => {
+  Card.findById(req.params.cardId).orFail(() => new NotFoundError('Card not found'))
     .then((card) => {
       if (card.owner.equals(req.user._id)) {
         Card.findByIdAndRemove(req.params.cardId)
           .then((item) => res.status(200).send({ data: item }))
-          .catch((err) => res.status(500).send({ message: err.message }));
+          .catch(next);
       } else {
-        res.status(403).send({ message: 'This card belongs to another user' });
+        throw new ForbiddenError('This card belongs to another user');
       }
     })
-    .catch((err) => notFoundHandler(err, res));
+    .catch(next);
 };
 
-module.exports.likeCard = (req, res) => Card.findByIdAndUpdate(
+module.exports.likeCard = (req, res, next) => Card.findByIdAndUpdate(
   req.params.cardId,
   { $addToSet: { likes: req.user._id } },
   { new: true },
-).orFail(() => new NotFoundError())
+).orFail(() => new NotFoundError('Card not found'))
   .populate(['owner', 'likes'])
   .then((card) => res.status(200).send({ data: card }))
-  .catch((err) => notFoundHandler(err, res));
+  .catch(next);
 
-module.exports.dislikeCard = (req, res) => Card.findByIdAndUpdate(
+module.exports.dislikeCard = (req, res, next) => Card.findByIdAndUpdate(
   req.params.cardId,
   { $pull: { likes: req.user._id } },
   { new: true },
-).orFail(() => new NotFoundError())
+).orFail(() => new NotFoundError('Card not found'))
   .then((card) => res.status(200).send({ data: card }))
-  .catch((err) => notFoundHandler(err, res));
+  .catch(next);

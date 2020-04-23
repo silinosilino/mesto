@@ -1,23 +1,25 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const { NotFoundError, notFoundHandler } = require('../errors/not-found-error');
+const { NotFoundError } = require('../errors/not-found-error');
+const { ConflictError } = require('../errors/conflictError');
+const { ValidationError } = require('../errors/validationError');
 
 const { JWT_SECRET } = require('../config.js');
 
-module.exports.getUsers = (req, res) => {
+module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.status(200).send({ data: users }))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch(next);
 };
 
-module.exports.doesUserExist = (req, res) => {
-  User.findById(req.params.id).orFail(() => new NotFoundError())
+module.exports.doesUserExist = (req, res, next) => {
+  User.findById(req.params.id).orFail(() => new NotFoundError('User not found'))
     .then((user) => res.status(200).send({ data: user }))
-    .catch((err) => notFoundHandler(err, res));
+    .catch(next);
 };
 
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
@@ -28,17 +30,16 @@ module.exports.createUser = (req, res) => {
     .then((user) => res.status(200).send({ data: user.omitPrivate() }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({ message: err.message });
+        return next(new ValidationError('Incorrect input'));
       }
       if (err.message.includes('duplicate key')) {
-        res.status(409).send({ message: 'User with this email already exists' });
-      } else {
-        res.status(500).send({ message: err.message });
+        return next(new ConflictError('User with this email already exists'));
       }
+      return next();
     });
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
   return User.findUserByCredentials(email, password)
@@ -52,14 +53,10 @@ module.exports.login = (req, res) => {
         })
         .send({ token });
     })
-    .catch((err) => {
-      res
-        .status(401)
-        .send({ message: err.message });
-    });
+    .catch(next);
 };
 
-module.exports.updateProfile = (req, res) => {
+module.exports.updateProfile = (req, res, next) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, about },
     {
@@ -67,10 +64,10 @@ module.exports.updateProfile = (req, res) => {
       runValidators: true,
     })
     .then((user) => res.status(200).send({ data: user }))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch(next);
 };
 
-module.exports.updateAvatar = (req, res) => {
+module.exports.updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(req.user._id, { avatar },
     {
@@ -78,5 +75,5 @@ module.exports.updateAvatar = (req, res) => {
       runValidators: true,
     })
     .then((user) => res.status(200).send({ data: user }))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch(next);
 };
